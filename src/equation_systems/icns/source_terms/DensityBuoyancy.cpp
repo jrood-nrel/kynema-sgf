@@ -37,11 +37,8 @@ DensityBuoyancy::~DensityBuoyancy() = default;
 /** Add the Boussinesq source term to the forcing array
  *
  *  \param lev AMR level
- *  \param mfi multiFab index
- *  \param bx Box to operate on
  *  \param fstate field state
- *  \param vel_forces Forcing source term, activated when density varies from
- * rho_0
+ *  \param src_term Cumulative forcing array
  */
 void DensityBuoyancy::operator()(
     const int lev, const FieldState fstate, amrex::MultiFab& src_term) const
