@@ -18,7 +18,7 @@ Checks: 'bugprone-*,
          -readability-function-cognitive-complexity,
          -readability-avoid-nested-conditional-operator'
 WarningsAsErrors: ''
-HeaderFilterRegex: '.*'
+HeaderFilterRegex: '^(?!.*submods).*'
 HeaderFileExtensions: ['', "H", 'h', 'hh', 'hpp', 'hxx']
 FormatStyle:     none
 User:            user
