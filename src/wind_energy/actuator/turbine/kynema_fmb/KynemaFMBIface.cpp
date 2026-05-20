@@ -363,12 +363,11 @@ amrex::Vector<int> build_aero(
     for (const auto& af : airfoil_io) {
         const auto s = af["spanwise_position"].as<double>();
         const auto chord = af["chord"].as<double>();
-        const auto twist = af["twist"].as<double>() *
-                           std::numbers::pi_v<double> / 180.0;
+        const auto twist =
+            af["twist"].as<double>() * std::numbers::pi_v<double> / 180.0;
         const auto section_offset_x = af["section_offset_x"].as<double>();
         const auto section_offset_y = af["section_offset_y"].as<double>();
-        const auto aerodynamic_center =
-            af["aerodynamic_center"].as<double>();
+        const auto aerodynamic_center = af["aerodynamic_center"].as<double>();
         auto aoa = af["polars"][0]["re_sets"][0]["cl"]["grid"]
                        .as<std::vector<double>>();
         std::ranges::transform(aoa, std::begin(aoa), [](auto degrees) {
