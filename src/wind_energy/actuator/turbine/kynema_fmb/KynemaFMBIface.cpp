@@ -361,28 +361,36 @@ amrex::Vector<int> build_aero(
         std::vector<kynema_fmb::interfaces::components::AerodynamicSection>{};
     auto id = 0UL;
     for (const auto& af : airfoil_io) {
-        const auto s = af["spanwise_position"].as<double>();
-        const auto chord = af["chord"].as<double>();
-        const auto twist =
-            af["twist"].as<double>() * std::numbers::pi_v<double> / 180.0;
-        const auto section_offset_x = af["section_offset_x"].as<double>();
-        const auto section_offset_y = af["section_offset_y"].as<double>();
-        const auto aerodynamic_center = af["aerodynamic_center"].as<double>();
+        const auto s = af["spanwise_position"].as<amrex::Real>();
+        const auto chord = af["chord"].as<amrex::Real>();
+        const auto twist = af["twist"].as<amrex::Real>() *
+                           std::numbers::pi_v<amrex::Real> / 180.0_rt;
+        const auto section_offset_x = af["section_offset_x"].as<amrex::Real>();
+        const auto section_offset_y = af["section_offset_y"].as<amrex::Real>();
+        const auto aerodynamic_center =
+            af["aerodynamic_center"].as<amrex::Real>();
         auto aoa = af["polars"][0]["re_sets"][0]["cl"]["grid"]
-                       .as<std::vector<double>>();
+                       .as<std::vector<amrex::Real>>();
         std::ranges::transform(aoa, std::begin(aoa), [](auto degrees) {
-            return degrees * std::numbers::pi_v<double> / 180.0;
+            return degrees * std::numbers::pi_v<amrex::Real> / 180.0_rt;
         });
         const auto aoa_copy = aoa;
         const auto cl = af["polars"][0]["re_sets"][0]["cl"]["values"]
-                            .as<std::vector<double>>();
+                            .as<std::vector<amrex::Real>>();
         const auto cd = af["polars"][0]["re_sets"][0]["cd"]["values"]
-                            .as<std::vector<double>>();
+                            .as<std::vector<amrex::Real>>();
         const auto cm = af["polars"][0]["re_sets"][0]["cm"]["values"]
-                            .as<std::vector<double>>();
+                            .as<std::vector<amrex::Real>>();
+
         blade_aero_sections.emplace_back(
-            id, s, chord, section_offset_x, section_offset_y,
-            aerodynamic_center, twist, aoa_copy, cl, cd, cm);
+            id, static_cast<double>(s), static_cast<double>(chord),
+            static_cast<double>(section_offset_x),
+            static_cast<double>(section_offset_y),
+            static_cast<double>(aerodynamic_center), static_cast<double>(twist),
+            std::vector<double>(aoa_copy.begin(), aoa_copy.end()),
+            std::vector<double>(cl.begin(), cl.end()),
+            std::vector<double>(cd.begin(), cd.end()),
+            std::vector<double>(cm.begin(), cm.end()));
         ++id;
     }
 
@@ -393,32 +401,40 @@ amrex::Vector<int> build_aero(
         std::vector<kynema_fmb::interfaces::components::AerodynamicSection>{};
     if (do_tower_aero) {
         const auto& tower_os = wio["components"]["tower"]["outer_shape"];
-        const auto aoa = std::vector<double>{-180., 180.};
-        const auto cl = std::vector<double>{0., 0.};
-        const auto cm = std::vector<double>{0., 0.};
-        const auto twist = 0.0;
-        const auto section_offset_x = 0.0;
-        const auto section_offset_y = 0.0;
-        const auto aerodynamic_center = 0.5;
-        auto cd_vec = tower_os["cd"]["values"].as<std::vector<double>>();
-        auto s_cd = tower_os["cd"]["grid"].as<std::vector<double>>();
+        const auto aoa = std::vector<amrex::Real>{-180.0_rt, 180.0_rt};
+        const auto cl = std::vector<amrex::Real>{0.0_rt, 0.0_rt};
+        const auto cm = std::vector<amrex::Real>{0.0_rt, 0.0_rt};
+        const auto twist = 0.0_rt;
+        const auto section_offset_x = 0.0_rt;
+        const auto section_offset_y = 0.0_rt;
+        const auto aerodynamic_center = 0.5_rt;
+        auto cd_vec = tower_os["cd"]["values"].as<std::vector<amrex::Real>>();
+        auto s_cd = tower_os["cd"]["grid"].as<std::vector<amrex::Real>>();
         if (tower_os.size() != tower_os["outer_diameter"]["values"]
-                                   .as<std::vector<double>>()
+                                   .as<std::vector<amrex::Real>>()
                                    .size()) {
             amrex::Print() << "WARNING: number of tower aero sections does not "
                               "match number of cd tower data. Linearly "
                               "interpolating cd to tower aero sections.\n";
         }
         id = 0UL;
-        for (const auto& chord :
-             tower_os["outer_diameter"]["values"].as<std::vector<double>>()) {
+        for (const auto& chord : tower_os["outer_diameter"]["values"]
+                                     .as<std::vector<amrex::Real>>()) {
             const auto s = tower_os["outer_diameter"]["grid"]
-                               .as<std::vector<double>>()[id];
+                               .as<std::vector<amrex::Real>>()[id];
             const auto cd = ::kynema_sgf::interp::linear(s_cd, cd_vec, s);
-            const auto cd_vec_wrapped = std::vector<double>{cd, cd};
+            const auto cd_vec_wrapped = std::vector<amrex::Real>{cd, cd};
             tower_aero_sections.emplace_back(
-                id, s, chord, section_offset_x, section_offset_y,
-                aerodynamic_center, twist, aoa, cl, cd_vec_wrapped, cm);
+                id, static_cast<double>(s), static_cast<double>(chord),
+                static_cast<double>(section_offset_x),
+                static_cast<double>(section_offset_y),
+                static_cast<double>(aerodynamic_center),
+                static_cast<double>(twist),
+                std::vector<double>(aoa.begin(), aoa.end()),
+                std::vector<double>(cl.begin(), cl.end()),
+                std::vector<double>(
+                    cd_vec_wrapped.begin(), cd_vec_wrapped.end()),
+                std::vector<double>(cm.begin(), cm.end()));
             ++id;
         }
         aero_builder.SetAirfoilSections(1UL, tower_aero_sections);
