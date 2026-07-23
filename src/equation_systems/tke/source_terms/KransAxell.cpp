@@ -7,6 +7,7 @@
 #include "src/utilities/linear_interpolation.H"
 #include "src/utilities/constants.H"
 #include "src/utilities/math_ops.H"
+#include "AMReX_Gpu.H"
 
 using namespace amrex::literals;
 namespace kynema_sgf::pde::tke {
@@ -92,6 +93,7 @@ void KransAxell::operator()(
         m_ref_theta_scratch = m_sim.repo().create_scratch_field(1, 0);
     }
     m_transport.ref_theta_fill(lev, (*m_ref_theta_scratch)(lev));
+    amrex::Gpu::streamSynchronize();
 
     const auto& geom = m_mesh.Geom(lev);
     const auto& problo = geom.ProbLoArray();
@@ -329,6 +331,7 @@ void KransAxell::operator()(
                 });
         }
     }
+    amrex::Gpu::streamSynchronize();
 }
 
 } // namespace kynema_sgf::pde::tke
