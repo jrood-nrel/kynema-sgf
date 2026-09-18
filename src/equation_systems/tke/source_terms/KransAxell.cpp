@@ -7,6 +7,7 @@
 #include "src/utilities/linear_interpolation.H"
 #include "src/utilities/constants.H"
 #include "src/utilities/math_ops.H"
+#include "AMReX_Gpu.H"
 
 using namespace amrex::literals;
 namespace kynema_sgf::pde::tke {
