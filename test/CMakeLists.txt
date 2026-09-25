@@ -116,7 +116,11 @@ endfunction(add_test_re)
 
 # Regression test and excluded from CI with dependency
 function(add_test_red TEST_NAME TEST_DEPENDENCY)
-    add_test_re(${TEST_NAME} ${ARGN})
+    if(ARGC GREATER 2)
+      add_test_re(${TEST_NAME} ${ARGV2})
+    else()
+      add_test_re(${TEST_NAME})
+    endif()
     set_tests_properties(${TEST_NAME} PROPERTIES FIXTURES_REQUIRED fixture_${TEST_DEPENDENCY})
     set_tests_properties(${TEST_DEPENDENCY} PROPERTIES FIXTURES_SETUP fixture_${TEST_DEPENDENCY})
 endfunction(add_test_red)
