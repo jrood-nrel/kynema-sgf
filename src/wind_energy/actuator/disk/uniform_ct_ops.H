@@ -147,10 +147,7 @@ private:
     int m_out_freq{10};
 
 public:
-    explicit ProcessOutputsOp<UniformCt, ActSrcDisk>(
-        const UniformCt::DataType& data)
-        : m_data(data)
-    {}
+    explicit ProcessOutputsOp(const UniformCt::DataType& data) : m_data(data) {}
     void operator()(UniformCt::DataType& /*unused*/) {}
     void read_io_options(const utils::ActParser& pp)
     {
